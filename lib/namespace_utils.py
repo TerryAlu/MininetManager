@@ -30,7 +30,7 @@ def find_pid(cmdline):
     pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
     for pid in pids:
 	if cmdline in open(os.path.join('/proc', pid, 'cmdline'), 'rb').read():
-		return pid
+		return int(pid)
     return None
 
 def find_node_pid(node_name):
