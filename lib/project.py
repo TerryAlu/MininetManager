@@ -1,5 +1,6 @@
 import os
 import sys
+from shutil import copyfile
 
 ## const. variable
 MNM_ENV_NAME = 'MNM_HOME'
@@ -11,7 +12,7 @@ def exist_dir(dir_path):
     return os.path.exists(dir_path)
 
 def exist_file(file_path):
-    return os.path.isfile(args.custom)
+    return os.path.isfile(file_path)
 
 # create directory if not exist
 def create_dir(dir_path, ignore_exist=True):
@@ -37,9 +38,12 @@ def create_project_dir():
 def create_target_dir(host_name, target_name):
     global project_path
     host_path = project_path+'/'+host_name
+    upper_path = host_path+'/'+target_name
+    work_path = host_path+'/'+target_name+'_work'
     create_dir(host_path)
-    create_dir(host_path+'/'+target_name)
-    create_dir(host_path+'/'+target_name+'_work')
+    create_dir(upper_path)
+    create_dir(work_path)
+    return (upper_path, work_path)
 
 # convert args list to string and write to the file
 def write_args(args):
@@ -53,13 +57,20 @@ def read_args():
     with open(args_path, 'r') as argsfile:
         return argsfile.read().split()
 
+def copy_custom(path):
+    global custom_path
+    copyfile(path, custom_path)
+
 # call this after getting project name
 def init_project(args):
     global project_path
     project_path = mnm_home_dir+'/'+args.project
     global args_path
     args_path = project_path+'/args'
+    # custom path is fixed in the project
+    global custom_path
+    custom_path = project_path+'/custom.py'
 
     create_mnm_home()
-    create_project_dir()
-    write_args(sys.argv)
+    if not args.l:
+        create_project_dir()

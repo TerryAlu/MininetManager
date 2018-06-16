@@ -1,0 +1,105 @@
+#!/usr/bin/env python
+
+import os
+import sys
+import inspect
+import subprocess as sp
+import argparse
+import multiprocessing as mp
+import time
+
+from mininet.util import ensureRoot
+
+#print sys.path
+import lib.namespace_utils as ns
+import lib.project as project
+import lib.topo_utils as tu
+
+def cmd_exists(cmd):
+    return sp.call('type ' + cmd, shell=True, 
+        stdout=sp.PIPE, stderr=sp.PIPE) == 0
+
+def check_args(args):
+    if not args.project:
+        print '--project argument can not be empty'
+        return False
+    return True
+
+def prepare_mn_args(mnm_keys):
+    '''
+    Remove mnm-only args
+    '''
+    mn_args = list(sys.argv)
+    for x in sys.argv:
+        for k in mnm_keys:
+            if '--'+k in x or '-'+k in x:
+                mn_args.remove(x)
+                break
+    # Remove the first element, which is exec name of mnm
+    return mn_args[1:]
+
+def prepare_mn_cmd():
+    mn_cmd = project.read_args()
+    if not project.custom_path:
+        raise Exception('project has not been initialized!!')
+    if project.exist_file(project.custom_path):
+        mn_cmd.append('--custom='+project.custom_path)
+    return ['mn']+mn_cmd
+
+def overlay_mount_loop(hosts):
+    while True:
+        # {hostname: pid}
+        phosts = ns.custom_hostdict(hosts)
+        # wait util the all host processes are created
+        if len(hosts) == len(phosts):
+            break
+    
+    # FIXME: only overlay mount /home for all hosts currently..
+    ns.overlay_mount(phosts, 'home')
+
+
+if __name__ == '__main__':
+
+    # Check root and mn command
+    ensureRoot()
+    if not cmd_exists('mn'):
+        print 'Mininet has not been installed!'
+        sys.exit(1)
+
+    # Parse arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--project',
+                       help='project name')
+    parser.add_argument('-l', action='store_true',
+                       help='load topology')
+    parser.add_argument('--custom',
+                       help='path to custom topology file')
+    args, unknown = parser.parse_known_args()
+
+    if not check_args(args):
+        sys.exit(1)
+
+    # Create mnm home dir and init. variable
+    project.init_project(args)
+
+    mn_cmd = ''
+    # Save mode
+    if not args.l:
+        mnm_keys = vars(args).keys()
+        mn_args = prepare_mn_args(mnm_keys)
+        project.write_args(mn_args)
+        
+        # Copy custom file 
+        if args.custom:
+            project.copy_custom(args.custom)
+
+    # Start a subprocess to overlay mount when host processes are ready
+    hosts = tu.load_topo_hosts()
+    overlay_process = mp.Process(target=overlay_mount_loop, args=(hosts,))
+    overlay_process.start()
+
+    # Handover to mn command
+    mn_args = project.read_args()
+    mn_cmd = prepare_mn_cmd()
+    sp.call(mn_cmd)
+

@@ -10,8 +10,8 @@ class MyTopo( Topo ):
         Topo.__init__( self )
 
         # Add hosts and switches
-        h1 = self.addHost( 'h1' )
-        h2 = self.addHost( 'h2' )
+        h1 = self.addHost( 'hh1' )
+        h2 = self.addHost( 'hh2' )
         s1 = self.addSwitch( 's1' )
 
         # Add links
