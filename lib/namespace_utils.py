@@ -83,8 +83,8 @@ def overlay_mount(hosts, target_name):
     for host, pid in hosts.iteritems():
         try:
             # Create overlay structure in project directory
-            upper_path, work_path = project.create_target_dir(host, target_name)
-            target_dir = '/'+target_name
+            upper_path, work_path = project.create_target_dir(host, target_name[host])
+            target_dir = target_name[host]
 
             # Try to overlay mount all hosts' target directory
             setns_pid(pid)

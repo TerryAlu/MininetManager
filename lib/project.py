@@ -37,9 +37,10 @@ def create_project_dir():
 # create upper and work directory for /<target_name> in virtual host
 def create_target_dir(host_name, target_name):
     global project_path
+    global host_path
     host_path = project_path+'/'+host_name
-    upper_path = host_path+'/'+target_name
-    work_path = host_path+'/'+target_name+'_work'
+    upper_path = host_path+target_name
+    work_path = host_path+target_name+'_work'
     create_dir(host_path)
     create_dir(upper_path)
     create_dir(work_path)
@@ -61,6 +62,10 @@ def copy_custom(path):
     global custom_path
     copyfile(path, custom_path)
 
+def copy_mount(path):
+    global mount_path
+    copyfile(path, mount_path)
+    
 # call this after getting project name
 def init_project(args):
     global project_path
@@ -71,6 +76,8 @@ def init_project(args):
     global custom_path
     custom_path = project_path+'/custom.py'
 
+    global mount_path
+    mount_path = project_path+'/mount.json'
     create_mnm_home()
     if not args.l:
         create_project_dir()

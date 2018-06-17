@@ -19,4 +19,5 @@ class MyTopo( Topo ):
         self.addLink( h2, s1 )
 
 
-topos = { 'mytopo': ( lambda: MyTopo() ) }
+topos = { 'mytopo': ( lambda: MyTopo() ),
+          'hostpath': { 'hh1': '/home', 'hh2': '/home/jkrvivian'} }
