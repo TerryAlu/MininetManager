@@ -9,11 +9,12 @@ Therfore, we can load the topology with the changes of files.
 ## How does it work?
 
 MininetManager create a project under `$MNM_HOME`. If `$MNM_HOME` is not set, then `/var/mnm` will be used.
-MininetManager passes arguments to `mn` and creates topology. After the topology has been created, MininetManager overlay mounts the /home directory.
+MininetManager passes arguments to `mn` and creates topology. After the topology has been created, MininetManager overlay mounts the directory according to mount.json. Mount point for each host can be specified here, the default mount point is directory `/home`.
+
 
 ## Example
 
-`$ sudo ./mnm --project=myproject --custom=./custom.py --topo=mytopo`
+`$ sudo ./mnm --project=myproject --custom=./custom.py --topo=mytopo --mntpath=mount.json`
 
 ```
 *** Creating network
@@ -38,7 +39,7 @@ mininet> hh1 touch /home/<username>/<somefiles>
 
 ## Usage
 
-`$ sudo ./mnm --project=<project_name> [-l] [--custom=<custom_file>]`
+`$ sudo ./mnm --project=<project_name> [-l] [--custom=<custom_file>] [--mntpath=<mount_point_file>]`
 
 * --project
   * project name
@@ -46,3 +47,6 @@ mininet> hh1 touch /home/<username>/<somefiles>
   * load project. If this flag is set, then mininet arguements and custom file will be loaded from the project.
 * --custom
   * path to the custom file. The custom file will be copied to the project.
+* --mntpath
+  * a json file specifies mount points for each host
+  * the default mount point is set to `/home`
